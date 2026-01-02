@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
-def load_crypto_data(symbol="BTC-USD", start="2018-01-01"):
+def load_crypto_data(symbol="BTC-USD", start="2024-06-01"):
     
     #Download historical price data from Yahoo Finance.
     
