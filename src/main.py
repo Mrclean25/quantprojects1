@@ -1,32 +1,42 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
+import argparse
+import logging
+from data_loader import load_crypto_data
+from features import create_features
+from ml_model import prepare_data, train_and_test
 
-def prepare_data(df):
-    
-    #Prepare features X and target y for ML model.
-    Target: 1 if next day close > current close, else 0
-   
-    df = df.copy()
-    df["target"] = (df["close"].shift(-1) > df["close"]).astype(int)
-    df = df.dropna()
-    features = ["return", "ma_short", "ma_long", "rsi", "volatility"]
-    X = df[features]
-    y = df["target"]
-    return X, y
 
-def train_and_test(X, y):
-    
-    #Train a Logistic Regression model and return train/test accuracy.
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=False)
-    model = Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(C=0.5, max_iter=1000))
-    ])
-    model.fit(X_train, y_train)
-    train_acc = accuracy_score(y_train, model.predict(X_train))
-    test_acc = accuracy_score(y_test, model.predict(X_test))
-    return model, train_acc, test_acc
+# Setup logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+# Argument parser
+
+parser = argparse.ArgumentParser(description="Beginner Quant Project")
+parser.add_argument("--symbol", type=str, default="BTC-USD", help="Crypto symbol, e.g., BTC-USD")
+parser.add_argument("--start", type=str, default="2018-01-01", help="Start date YYYY-MM-DD")
+args = parser.parse_args()
+
+
+# Main workflow
+
+def main(symbol, start):
+    logging.info(f"Loading data for {symbol} starting {start}...")
+    df = load_crypto_data(symbol, start=start)
+    logging.info(f"Data loaded: {len(df)} rows")
+
+    logging.info("Creating features...")
+    df = create_features(df)
+    logging.info(f"Features created: {df.columns.tolist()}")
+
+    X, y = prepare_data(df)
+    logging.info(f"Prepared ML data: X shape {X.shape}, y shape {y.shape}")
+
+    logging.info("Training and testing model...")
+    model, train_acc, test_acc = train_and_test(X, y)
+
+    logging.info(f"Train Accuracy: {round(train_acc,3)}")
+    logging.info(f"Test Accuracy: {round(test_acc,3)}")
+
+if __name__ == "__main__":
+    main(args.symbol, args.start)
