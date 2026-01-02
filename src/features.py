@@ -15,9 +15,10 @@ def rsi(series, period=14):
 def volatility(series, window=5):
     return series.pct_change().rolling(window).std()
 
-def create_features(df, ma_short_window=5, ma_long_window=10, rsi_period=5, vol_window=5):
- 
-    #Add features to dataframe for ML model.
+def create_features(df, ma_short_window, ma_long_window, rsi_period, vol_window):
+
+    #Adds 5 ML features: return, ma_short, ma_long, rsi, volatility
+    Parameters are configurable.
     
     df = df.copy()
     df["return"] = df["close"].pct_change()
