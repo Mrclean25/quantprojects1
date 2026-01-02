@@ -1,2 +1,5 @@
-pip install yfinance pandas scikit-learn
+pandas
+yfinance
+scikit-learn
+
 
